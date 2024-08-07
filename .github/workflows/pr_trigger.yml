@@ -1,0 +1,26 @@
+name: Log GitHub Changes
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  log_changes:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Send repository changes to Lambda
+        env:
+          API_ENDPOINT: ${{ secrets.API_ENDPOINT }}
+        run: |
+          echo "Triggering Lambda function to log changes..."
+          curl -X POST $API_ENDPOINT \
+          -H "Content-Type: application/json" \
+          -d "$(jq -n \
+               --arg repo "${{ github.repository }}" \
+               --argjson commits "${{ toJson(github.event.commits) }}" \
+               '{repository: {full_name: $repo}, commits: $commits}')"

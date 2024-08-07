@@ -1,9 +1,8 @@
 name: Log GitHub Changes
 
 on:
-  push:
-    branches:
-      - main
+  pull_request:
+    types: [ opened, synchronize ]
 
 jobs:
   log_changes:

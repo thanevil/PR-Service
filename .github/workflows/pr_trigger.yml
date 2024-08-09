@@ -24,7 +24,7 @@ jobs:
           pip install boto3 requests-aws4auth
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::654654242440:role/github-oidc-role
           aws-region: ${{ env.AWS_REGION }}

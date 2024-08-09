@@ -11,7 +11,7 @@ session = boto3.Session(region_name=aws_region)
 s3_client = session.client('s3')
 
 # Define your S3 bucket name
-bucket_name = 'your-s3-bucket-name'
+bucket_name = 'pr-service-bucket-alex'
 
 # Upload changed files to S3
 for file_path in changed_files:

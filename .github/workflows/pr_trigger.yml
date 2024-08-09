@@ -22,16 +22,7 @@ jobs:
       - name: dependencies
         run: |
           pip install boto3
-
-      - name: get brach and main
-        run: |
-          git fetch origin ${{ github.base_ref }}
-          git fetch origin ${{ github.head_ref }}
-
-      - name: diff files
-        id: files
-        run: echo "::set-output name=files::$(git diff-tree --name-only -r --merge-base origin/${{ github.event.pull_request.base.ref }} origin/${{ github.head_ref }})"
-
+          pip install requests
 
       - name: AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -41,6 +32,7 @@ jobs:
 
       - name: log changes pull request upload to aws
         env:
-          CHANGED_FILES: ${{ steps.files.outputs.files }}
           REPO_NAME: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GITHUB_TOKEN: ${{ secrets.pr_access_token }}
         run: python log_changes.py

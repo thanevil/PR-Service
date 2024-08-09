@@ -15,7 +15,13 @@ s3_client = session.client('s3')
 bucket_name = 'pr-service-bucket-alex'
 
 # Create a log file with the repository name
-log_file_name = f"{repo_name}.log"
+log_file_name = f"{repo_name}_log.txt"
+
+# Ensure the directory for the log file exists
+log_directory = os.path.dirname(log_file_name)
+if log_directory and not os.path.exists(log_directory):
+    os.makedirs(log_directory)
+
 with open(log_file_name, 'w') as log_file:
     log_file.write("Changed files:\n")
     for file_path in changed_files:
@@ -33,8 +39,4 @@ s3_key = f"{repo_name}/{current_time}/{log_file_name}"
 # Upload the log file to S3
 s3_client.upload_file(log_file_name, bucket_name, s3_key)
 print(f"Uploaded log file to {bucket_name}/{s3_key}")
-
-# Clean up the local log file
-os.remove(log_file_name)
-
 print("All changed files have been processed and logged.")

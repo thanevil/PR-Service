@@ -1,0 +1,63 @@
+
+name: PR Logger
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  log_pr_changes:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: us-east-1
+
+    permissions:
+      id-token: write
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          pip install boto3 requests-aws4auth
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4.0.2
+        with:
+          role-to-assume: arn:aws:iam::654654242440:role/github-oidc-role
+          aws-region: ${{ env.AWS_REGION }}
+
+#      - name: Get changed files
+#        id: files
+#        run: |
+#          echo "::set-output name=files::$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})"
+#
+#      - name: Log changes to AWS Lambda with signed request
+#        run: |
+#          python - <<EOF
+#          import boto3
+#          from requests_aws4auth import AWS4Auth
+#          import requests
+#          import json
+#
+#          session = boto3.Session(
+#              aws_access_key_id='${{ secrets.IAM_AWS_ACCESS_KEY_ID }}',
+#              aws_secret_access_key='${{ secrets.IAM_AWS_SECRET_ACCESS_KEY }}',
+#              region_name='us-east-1'
+#          )
+#
+#          credentials = session.get_credentials()
+#          auth = AWS4Auth(credentials.access_key, credentials.secret_key, session.region_name, 'execute-api')
+#
+#          url = '${{ secrets.API_GATEWAY_ENDPOINT }}'
+#          data = {
+#              'repository': {'full_name': '${{ github.repository }}'},
+#              'pull_request': {'files': [${{ steps.files.outputs.files }}]}
+#          }
+#
+#          response = requests.post(url, auth=auth, json=data)
+#          print(response.status_code)
+#          print(response.text)
+#          EOF

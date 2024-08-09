@@ -19,45 +19,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install dependencies
+      - name: dependencies
         run: |
-          pip install boto3 requests-aws4auth
+          pip install boto3
 
-      - name: Configure AWS credentials
+      - name: get brach and main
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          git fetch origin ${{ github.head_ref }}
+
+      - name: diff files
+        id: files
+        run: echo "::set-output name=files::$(git diff-tree --name-only -r --merge-base origin/${{ github.event.pull_request.base.ref }} origin/${{ github.head_ref }})"
+
+
+      - name: AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::654654242440:role/github-oidc-role
           aws-region: ${{ env.AWS_REGION }}
 
-#      - name: Get changed files
-#        id: files
-#        run: |
-#          echo "::set-output name=files::$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})"
-#
-#      - name: Log changes to AWS Lambda with signed request
-#        run: |
-#          python - <<EOF
-#          import boto3
-#          from requests_aws4auth import AWS4Auth
-#          import requests
-#          import json
-#
-#          session = boto3.Session(
-#              aws_access_key_id='${{ secrets.IAM_AWS_ACCESS_KEY_ID }}',
-#              aws_secret_access_key='${{ secrets.IAM_AWS_SECRET_ACCESS_KEY }}',
-#              region_name='us-east-1'
-#          )
-#
-#          credentials = session.get_credentials()
-#          auth = AWS4Auth(credentials.access_key, credentials.secret_key, session.region_name, 'execute-api')
-#
-#          url = '${{ secrets.API_GATEWAY_ENDPOINT }}'
-#          data = {
-#              'repository': {'full_name': '${{ github.repository }}'},
-#              'pull_request': {'files': [${{ steps.files.outputs.files }}]}
-#          }
-#
-#          response = requests.post(url, auth=auth, json=data)
-#          print(response.status_code)
-#          print(response.text)
-#          EOF
+      - name: log changes pull request upload to aws
+        env:
+          CHANGED_FILES: ${{ steps.files.outputs.files }}
+          REPO_NAME: ${{ github.repository }}
+        run: python log_changes.py

@@ -14,7 +14,7 @@ session = boto3.Session(region_name=aws_region)
 s3_client = session.client('s3')
 
 # Define your S3 bucket name
-bucket_name = 'pr-service-bucket-alex'
+bucket_name = 'pr-service-bucket-cp'
 
 # GitHub API URL to get changed files in the pull request
 api_url = f"https://api.github.com/repos/{repo_name}/pulls/{pr_number}/files"

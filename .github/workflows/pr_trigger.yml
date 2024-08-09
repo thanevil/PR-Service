@@ -3,7 +3,7 @@ name: PR Logger
 
 on:
   pull_request:
-    types: [opened, synchronize]
+  workflow_dispatch:
 
 jobs:
   log_pr_changes:
